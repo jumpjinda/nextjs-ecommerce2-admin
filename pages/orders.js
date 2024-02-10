@@ -12,7 +12,7 @@ const OrdersPage = () => {
     });
   }, []);
 
-  console.log(orders.length);
+  // console.log(orders.length);
   // console.log("Outside UseEffect orders =", orders);
 
   return (

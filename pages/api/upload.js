@@ -7,21 +7,22 @@ import mime from "mime-types";
 import {mongooseConnect} from "@/lib/mongoose";
 import {isAdminRequest} from "./auth/[...nextauth]";
 
-const bucketName = "nextjs-ecommerce2";
+const bucketName="nextjs-ecommerce2";
 
 export default async function handle(req, res) {
   await mongooseConnect();
   await isAdminRequest(req, res);
-  const from = new multiparty.Form();
-  const {fields, files} = await new Promise((resolve, reject) => {
+  const from=new multiparty.Form();
+  const {fields, files}=await new Promise((resolve, reject) => {
     from.parse(req, (err, fields, files) => {
       if (err) throw err;
       resolve({fields, files});
     });
   });
+  console.log(files);
   // console.log("length", files.file.length);
   // console.log(fields);
-  const client = new S3Client({
+  const client=new S3Client({
     region: "ap-southeast-1",
     credentials: {
       accessKeyId: process.env.S3_ACCESS_KEY,
@@ -29,12 +30,12 @@ export default async function handle(req, res) {
     },
   });
 
-  const links = [];
+  const links=[];
 
   for (const file of files.file) {
-    const ext = file.originalFilename.split(".").pop();
+    const ext=file.originalFilename.split(".").pop();
     // console.log({ ext, file });
-    const newFilename = Date.now() + "." + ext;
+    const newFilename=Date.now()+"."+ext;
 
     await client.send(
       new PutObjectCommand({
@@ -46,7 +47,7 @@ export default async function handle(req, res) {
       })
     );
     // grab image link from s3
-    const link = `https://${bucketName}.s3.amazonaws.com/${newFilename}`;
+    const link=`https://${bucketName}.s3.amazonaws.com/${newFilename}`;
 
     // push all link to links[]
     links.push(link);
@@ -54,6 +55,6 @@ export default async function handle(req, res) {
   return res.json({links});
 }
 
-export const config = {
+export const config={
   api: {bodyParser: false},
 };
